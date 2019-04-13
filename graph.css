@@ -1,0 +1,36 @@
+#startDate, #endDate {
+    width: 100px;
+    text-align: center;
+}
+span.startDate, span.endDate, span.remove {
+    cursor: pointer;
+}
+span.remove {
+    display: none;
+}
+#tooltip {
+    white-space: nowrap;
+    position: absolute;
+    display: none;
+    border: 1px solid #ddf;
+    padding: 2px;
+    background-color: #eef;
+}
+#width, #height {
+    width: 50px;
+    text-align: center;
+}
+#aggregates > div {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 10px;
+}
+#sources td {
+    vertical-align: top;
+}
+.future {
+    color: red;
+}
+.past {
+    color: red;
+}

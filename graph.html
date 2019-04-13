@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+  <head>
+    <script type="text/javascript" src="jquery-3.2.0.min.js"></script>
+    <link type="text/css" href="jquery-ui-1.12.1/jquery-ui.css" rel="stylesheet" />
+    <script type="text/javascript" src="jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="flotdev/jquery.flot.js"></script>
+    <script type="text/javascript" src="flotdev/jquery.flot.time.js"></script>
+    <script type="text/javascript" src="flotdev/jquery.flot.selection.js"></script>
+    <link rel="stylesheet" type="text/css" href="graph.css" />
+    <script src="entries.js"></script>
+    <script src="graph.js"></script>
+  </head>
+  <body>
+    <div id="graph" style="width: 100%; height: 400px;"></div>
+    <div>
+      Legend:
+      <select id="legend" name="legend">
+	<option value="nw">NW</option>
+	<option value="sw">SW</option>
+	<option value="ne">NE</option>
+	<option value="se">SE</option>
+	</select> &nbsp;
+	Width: <input name="width" id="width" class="size" /> &nbsp;
+	Height: <input name="height" id="height" class="size" /> &nbsp;&nbsp;&nbsp;
+	<input type="checkbox" name="showStartDate" id="showStartDate" checked />
+	Start Date: <input name="startDate" id="startDate" readonly /> &nbsp;
+	<input type="checkbox" name="showEndDate" id="showEndDate" checked />
+	End Date: <input name="endDate" id="endDate" readonly /> &nbsp;
+	<button id="update">Update</button>
+	<button id="zoomIn">Zoom In</button>
+	<button id="zoomOut">Zoom Out</button>
+    </div>
+    <table id="sources">
+      <tr>
+	<td>Fund:</td>
+	<td>
+	  <select id="funds" name="funds">
+	    <option value=""></option>
+	  </select>
+	  <input type="button" name="addFund" id="addFund" value="Add" />
+	</td>
+      </tr>
+      <tr>
+	<td>Index:</td>
+	<td>
+	  <select id="indexes" name="indexes">
+	    <option value=""></option>
+	  </select>
+	  <input type="button" name="addIndex" id="addIndex" value="Add" />
+	</td>
+      </tr>
+      <tr>
+	<td>Portfolio:</td>
+	<td>
+	  <select id="portfolios" name="portfolios">
+	    <option value=""></option>
+	  </select>
+	  <input type="button" name="addPortfolio" id="addPortfolio" value="Add" />
+	</td>
+      </tr>
+      <tr>
+	<td>Aggregate:</td>
+	<td>
+	  <div id="aggregates">
+	    <div>
+	      <input type="checkbox" name="type" value="MF" /> Mutual Funds<br />
+	      <input type="checkbox" name="type" value="UITF" /> Unit Investment Trust Funds
+	    </div>
+	    <div>
+	      <input type="checkbox" name="classification" value="Equity" /> Equity<br />
+	      <input type="checkbox" name="classification" value="Bond" /> Bond<br />
+	      <input type="checkbox" name="classification" value="Balanced" /> Balanced<br />
+	      <input type="checkbox" name="classification" value="Money Market" /> Money Market
+	    </div>
+	    <div>
+	      <input type="checkbox" name="currency" value="PHP" /> PHP<br />
+	      <input type="checkbox" name="currency" value="USD" /> USD<br />
+	      <input type="checkbox" name="currency" value="EUR" /> EUR<br />
+	      <input type="checkbox" name="currency" value="JPY" /> JPY
+	    </div>
+	    <div>
+	      <input type="button" name="addAggregate" id="addAggregate" value="Add" />
+	    </div>
+	  </div>
+	</td>
+      </tr>
+    </table>
+    <div>
+      Data Set:
+      <select id="dataset" name="dataset">
+	<option value="0">Returns from Start</option>
+	<option value="-1">Returns to End</option>
+	<option value="1">1-Year Returns</option>
+	<option value="3">3-Year Returns</option>
+	<option value="5">5-Year Returns</option>
+	<option value="7">7-Year Returns</option>
+	<option value="10">10-Year Returns</option>
+	<option value="15">15-Year Returns</option>
+	<option value="20">20-Year Returns</option>
+	</select> &nbsp;
+	<input type="checkbox" id="real" name="real" /> Real &nbsp;
+	<input type="checkbox" id="perannum" name="perannum" /> Per Annum &nbsp;
+	<input type="checkbox" id="sma5" name="sma5" /> SMA5 &nbsp;&nbsp;
+	<button id="reset">Reset</button>
+	<button id="clear">Clear</button>
+    </div>
+    <div id="tooltip"></div>
+  </body>
+</html>
