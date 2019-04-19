@@ -15,6 +15,7 @@ span.remove {
     border: 1px solid #ddf;
     padding: 2px;
     background-color: #eef;
+    opacity: .8;
 }
 #width, #height {
     width: 50px;
