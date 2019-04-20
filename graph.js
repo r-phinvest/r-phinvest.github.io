@@ -1,3 +1,7 @@
+Date.prototype.toISODate = function(){
+  return (new Date(this.getTime() - this.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+}
+
 function labelFormatter(label, series) {
   var l = $(label);
   var dates = [];
@@ -15,37 +19,92 @@ function labelFormatter(label, series) {
   return $(l).append('<span class="remove ui-icon ui-icon-close"></span>').wrap('<p/>').parent().html();
 }
 
-function reloadGraph(op = 'reload') {
-  switch (op) {
-  case 'clear':
-    break;
-  case 'reset':
-    break;
-  default:
-  }
+function reloadGraph() {
+  $.dataSeries = [];
+  $.graph = $.plot('#graph', $.dataSeries, $.options);
+  for (var id of $.ids) addDataSeries(id);
 }
 
-function setupDataSeries(id) {
-  var data = $.entryData[id];
-  var startDate = new Date(data.data[0][0]+28800000).toISOString().split('T')[0];
-  var endDate = new Date(data.data[data.data.length-1][0]+28800000).toISOString().split('T')[0];
+function setupDataSeries(id, data) {
+  if (!data.length) return;
+  startDate = (new Date(data[0][0])).toISODate();
+  endDate = (new Date(data[data.length-1][0])).toISODate();
   if ($('#startDate').val()) {
-    data.data = data.data.filter(x => x[0] >= new Date($('#startDate').val()));
-    startDate = new Date(data.data[0][0]+28800000).toISOString().split('T')[0];
+    data = data.filter(x => new Date(x[0]) >= new Date($('#startDate').val()));
+    if (!data.length) return;
+    startDate = (new Date(data[0][0])).toISODate();
   } else $('#startDate').val(startDate);
   if ($('#endDate').val()) {
-    data.data = data.data.filter(x => x[0] <= new Date($('#endDate').val()));
-    endDate = new Date(data.data[data.data.length-1][0]+28800000).toISOString().split('T')[0];
+    data = data.filter(x => new Date(x[0]) <= new Date($('#endDate').val()));
+    endDate = (new Date(data[data.length-1][0])).toISODate();
   } else $('#endDate').val(endDate);
   switch ($('#dataset').val()) {
   case '-1':
-    data = data.data.map(x => [x[0], (data.data[data.data.length-1][1] / x[1] - 1) * 100]);
+    data = data.map(x => [x[0], (data[data.length-1][1] / x[1] - 1) * 100]);
     break;
   case '0':
-    data = data.data.map(x => [x[0], (x[1] / data.data[0][1] - 1) * 100]);
+    data = data.map(x => [x[0], (x[1] / data[0][1] - 1) * 100]);
     break;
   default:
-    data = data.data;
+    data = data.map(x => [x[0], x[1]*100]);
+    break;
+  }
+  if ($('#real').prop('checked')) {
+    var idata = [];
+    switch ($('#dataset').val()) {
+    case '-1':
+      idata = $.entryData['101'];
+      data = data.filter(x => x[0] <= idata[idata.length-1][0]);
+      var i0 = idata.find(y => y[0] == data[data.length-1][0])[1];
+      data = data.map(function(x){
+	var i = idata.find(y => x[0] == y[0])[1];
+	return [x[0], ((1 + x[1]/100) / (i0 / i) - 1) * 100];
+      });
+      break;
+    case '0':
+      idata = $.entryData['101'];
+      data = data.filter(x => x[0] <= idata[idata.length-1][0]);
+      var i0 = idata.find(y => y[0] == data[0][0])[1];
+      data = data.map(function(x){
+	var i = idata.find(y => x[0] == y[0])[1];
+	return [x[0], ((1 + x[1]/100) / (i / i0) - 1) * 100];
+      });
+      break;
+    default:
+      idata = $.entryData['101-'+$('#dataset').val()];
+      data = data.filter(x => x[0] <= idata[idata.length-1][0]);
+      data = data.map(function(x){
+	var i = idata.find(y => x[0] == y[0])[1];
+	return [x[0], ((1 + x[1]/100) / (1 + i) - 1) * 100];
+      });
+      break;
+    }
+  }
+  if ($('#perannum').prop('checked')) {
+    switch ($('#dataset').val()) {
+    case '-1':
+      data = data.map(function(x){
+	var days = (new Date(data[data.length-1][0]) - new Date(x[0])) / 86400000;
+	var years = days / 365.2422;
+	if (years < 1) return x;
+	else return [x[0], ((1 + x[1]/100) ** (1 / years) - 1) * 100];
+      });
+      break;
+    case '0':
+      data = data.map(function(x){
+	var days = (new Date(x[0]) - new Date(data[0][0])) / 86400000;
+	var years = days / 365.2422;
+	if (years < 1) return x;
+	else return [x[0], ((1 + x[1]/100) ** (1 / years) - 1) * 100];
+      });
+      break;
+    default:
+      data = data.map(function(x){
+	var years = Number($('#dataset').val());
+	return [x[0], ((1 + x[1]/100) ** (1 / years) - 1) * 100];
+      });
+      break;
+    }
   }
   $.dataSeries.push({
     id: id,
@@ -56,18 +115,34 @@ function setupDataSeries(id) {
   $.graph = $.plot('#graph', $.dataSeries, $.options);
 }
 
-function addDataSeries(id) {
+function addDataSeries2(id) {
   if ($.dataSeries.find(x => x.id == id)) return;
-  if (id in $.entryData) {
-    setupDataSeries(id);
-  } else {
-    var url = 'data/'+id;
-    if (Number($('#dataset').val()) > 0) url += '-'+$('#dataset').val();
-    url += '.json';
-    $.getJSON(url, function(data){
-      $.entryData[id] = data;
-      setupDataSeries(id);
+  var entryId = id;
+  if (Number($('#dataset').val()) > 0) entryId += '-'+$('#dataset').val();
+  else if ($('#sma5').prop('checked')) entryId += '-sma5';
+  if (entryId in $.entryData)
+    setupDataSeries(id, $.entryData[entryId]);
+  else
+    $.getJSON('data/'+entryId+'.json', function(data){
+      $.entryData[entryId] = data.data;
+      setupDataSeries(id, data.data);
     });
+}
+
+function addDataSeries(id) {
+  if ($.ids.indexOf(id) == -1) $.ids.push(id);
+  if ($('#real').prop('checked')) {
+    var inflationId = '101';
+    if (Number($('#dataset').val()) > 0) inflationId += '-'+$('#dataset').val();
+    if (inflationId in $.entryData)
+      addDataSeries2(id);
+    else
+      $.getJSON('data/'+inflationId+'.json', function(data){
+	$.entryData[inflationId] = data.data;
+	addDataSeries2(id);
+      });
+  } else {
+    addDataSeries2(id);
   }
 }
 
@@ -76,7 +151,7 @@ function initGraph() {
   params.forEach(function(value, key){
     switch (key) {
     case 'id':
-      addDataSeries(value);
+      $.ids.push(value);
       break;
     case 'legend':
     case 'dataset':
@@ -91,9 +166,11 @@ function initGraph() {
       break;
     }
   });
+  for (var id of $.ids) addDataSeries(id);
 }
 
 $(function(){
+  $.ids = [];
   $.entryData = {};
   $.dataSeries = [];
   $.options = {
@@ -126,21 +203,21 @@ $(function(){
   $('#graph').bind('plotselected', function(event, ranges){
     $.startDate = $('#startDate').val();
     $.endDate = $('#endDate').val();
-    $('#startDate').val(new Date(ranges.xaxis.from+28800000).toISOString().split('T')[0]);
-    $('#endDate').val(new Date(ranges.xaxis.to+28800000).toISOString().split('T')[0]);
+    $('#startDate').val(new Date(ranges.xaxis.from).toISODate());
+    $('#endDate').val(new Date(ranges.xaxis.to).toISODate());
   });
   $('#graph').bind('plotunselected', function(){
     if ($.startDate && $.endDate) {
       $('#startDate').val($.startDate);
       $('#endDate').val($.endDate);
-      $.startDate = '';
-      $.endDate = '';
+      $.startDate = null;
+      $.endDate = null;
     }
   });
   $('#graph').bind('plothover', function(event, pos, item){
-    if (item) $('#tooltip').html(item.series.label+'<br />'+(new Date(item.datapoint[0]+28800000).toISOString().split('T')[0])+'<br />'+item.datapoint[1].toFixed(2)).css({
-      bottom: $(this).height()-item.pageY+250,
-      right: $(this).width()-item.pageX+20
+    if (item) $('#tooltip').html(item.series.label+'<br />'+(new Date(item.datapoint[0]).toISODate())+'<br />'+item.datapoint[1].toFixed(2)).css({
+      top: item.pageY,
+      left: item.pageX
     }).fadeIn(200);
     else $('#tooltip').hide();
   });
@@ -181,21 +258,27 @@ $(function(){
     $.graph.setupGrid();
   });
   $('#update').click(function(){
+    $.originalStartDate = null;
+    $.originalEndDate = null;
     reloadGraph();
   });
   $('#zoomIn').click(function(){
+    if (!$.startDate || !$.endDate) return;
     $.each($.graph.getXAxes(), function(_, axis){
       var opts = axis.options;
       opts.min = new Date($('#startDate').val()).getTime();
       opts.max = new Date($('#endDate').val()).getTime();
     });
-    $.originalStartDate = $('#startDate').val();
-    $.originalEndDate = $('#endDate').val();
+    $.originalStartDate = $.startDate;
+    $.originalEndDate = $.endDate;
+    $.startDate = null;
+    $.endDate = null;
     $.graph.setupGrid();
     $.graph.draw();
     $.graph.clearSelection();
   });
   $('#zoomOut').click(function(){
+    if (!$.originalStartDate || !$.originalEndDate) return;
     $.each($.graph.getXAxes(), function(_, axis){
       var opts = axis.options;
       $('#startDate').val($.originalStartDate);
@@ -203,9 +286,9 @@ $(function(){
       opts.min = new Date($.originalStartDate).getTime();
       opts.max = new Date($.originalEndDate).getTime();
     });
-    $.graph.setupGrid();
-    $.graph.draw();
-    $.graph.clearSelection();
+    $.originalStartDate = null;
+    $.originalEndDate = null;
+    $.graph = $.plot('#graph', $.dataSeries, $.options);
   });
   $('input.size').change(function(){
     $('#graph').css({width: $('#width').val(), height: $('#height').val()});
@@ -214,14 +297,24 @@ $(function(){
     $.graph.draw();
   });
   $('#reset').click(function(){
-    reloadGraph('reset');
+    if (!$.ids.length) return;
+    var min = null, max = null;
+    var data; 
+    for (var id of $.ids) {
+      if (!min || new Date(entries[id].startDate) < min) min = new Date(entries[id].startDate);
+      if (!max || new Date(entries[id].endDate) > max) max = new Date(entries[id].endDate);
+    }
+    $('#startDate').val(min.toISODate());
+    $('#endDate').val(max.toISODate());
+    reloadGraph();
   });
   $('#clear').click(function(){
     $('#dataset').val(0);
     $('#real').prop('checked', 0);
     $('#perannum').prop('checked', 0);
     $('#sma5').prop('checked', 0);
-    reloadGraph('clear');
+    $.dataSeries = [];
+    $.graph = $.plot('#graph', $.dataSeries, $.options);
   });
   $('#graph').on('click', 'span.startDate', function(){
     $('#startDate').val($(this).html());
@@ -234,10 +327,9 @@ $(function(){
   $('#graph').on('click', 'span.remove', function(){
     var id = $(this).parent().data('id');
     var type = $(this).parent().data('type');
-    $.get('remove', {type: type, id: id}, function(){
-      $.dataSeries = $.dataSeries.filter(x => x.type !== type || x.id !== id);
-      $.graph = $.plot('#graph', $.dataSeries, $.options);
-    });
+    $.ids = $.ids.filter(x => x != id);
+    $.dataSeries = $.dataSeries.filter(x => x.id != id);
+    $.graph = $.plot('#graph', $.dataSeries, $.options);
   });
   $('#graph').on('mouseover', 'span.label', function(){
     $(this).find('span.remove').css('display', 'inline-block');
@@ -250,7 +342,6 @@ $(function(){
       addDataSeries($('#funds').val());
   });
   $('#addIndex').click(function(){
-    console.log($('#indexes').val());
     if ($('#indexes').val())
       addDataSeries($('#indexes').val());
   });
