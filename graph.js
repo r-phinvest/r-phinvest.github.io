@@ -23,6 +23,7 @@ function reloadGraph() {
   $.dataSeries = [];
   $.graph = $.plot('#graph', $.dataSeries, $.options);
   for (var id of $.ids) addDataSeries(id);
+  shareURL();
 }
 
 function setupDataSeries(id, data) {
@@ -47,7 +48,6 @@ function setupDataSeries(id, data) {
     break;
   default:
     data = data.map(x => [x[0], x[1]*100]);
-    break;
   }
   if ($('#real').prop('checked')) {
     var idata = [];
@@ -77,7 +77,6 @@ function setupDataSeries(id, data) {
 	var i = idata.find(y => x[0] == y[0])[1];
 	return [x[0], ((1 + x[1]/100) / (1 + i) - 1) * 100];
       });
-      break;
     }
   }
   if ($('#perannum').prop('checked')) {
@@ -103,7 +102,6 @@ function setupDataSeries(id, data) {
 	var years = Number($('#dataset').val());
 	return [x[0], ((1 + x[1]/100) ** (1 / years) - 1) * 100];
       });
-      break;
     }
   }
   $.dataSeries.push({
@@ -144,6 +142,18 @@ function addDataSeries(id) {
   } else {
     addDataSeries2(id);
   }
+  shareURL();
+}
+
+function shareURL() {
+  var url = location.protocol+'//'+location.host+location.pathname;
+  var params = [['dataset='+$('#dataset').val()]], p;
+  for (var id of $.ids) params.push('id='+id);
+  for (p of ['legend', 'startDate', 'endDate'])
+    if ($('#'+p).val()) params.push(p+'='+$('#'+p).val());
+  for (p of ['real', 'perannum', 'sma5'])
+    if ($('#'+p).prop('checked')) params.push(p+'=true');
+  $('#url').val(url+'?'+params.join('&'));
 }
 
 function initGraph() {
@@ -154,6 +164,9 @@ function initGraph() {
       $.ids.push(value);
       break;
     case 'legend':
+      $('#legend').val(value);
+      $.options.legend.position = value;
+      break;
     case 'dataset':
     case 'startDate':
     case 'endDate':
@@ -167,6 +180,7 @@ function initGraph() {
     }
   });
   for (var id of $.ids) addDataSeries(id);
+  shareURL();
 }
 
 $(function(){
@@ -187,10 +201,11 @@ $(function(){
     }
   };
   $.graph = $.plot('#graph', $.dataSeries, $.options);
+  var funds = [];
   for (var key in entries)
     switch (entries[key].type) {
     case "fund":
-      $('#funds').append('<option value="'+key+'">'+entries[key].name+'</option>');
+      funds.push([key, entries[key].name]);
       break;
     case "index":
       $('#indexes').append('<option value="'+key+'">'+entries[key].name+'</option>');
@@ -198,6 +213,11 @@ $(function(){
     default:
       $('#portfolios').append('<option value="'+key+'">'+entries[key].name+'</option>');
     }
+  funds.sort(function(a, b){
+    return a[1].toUpperCase() > b[1].toUpperCase() ? 1 : -1;
+  });
+  for (var f of funds)
+    $('#funds').append('<option value="'+f[0]+'">'+f[1]+'</option>');
   $('#width').val($('#graph').width());
   $('#height').val($('#graph').height());
   $('#graph').bind('plotselected', function(event, ranges){
@@ -215,15 +235,26 @@ $(function(){
     }
   });
   $('#graph').bind('plothover', function(event, pos, item){
-    if (item) $('#tooltip').html(item.series.label+'<br />'+(new Date(item.datapoint[0]).toISODate())+'<br />'+item.datapoint[1].toFixed(2)).css({
-      top: item.pageY,
-      left: item.pageX
-    }).fadeIn(200);
-    else $('#tooltip').hide();
+    if (item) {
+      $('#tooltip').html(item.series.label+'<br />'+(new Date(item.datapoint[0]).toISODate())+'<br />'+item.datapoint[1].toFixed(2))
+	.fadeIn(200);
+      if (item.pageX+$('#tooltip').width()+20 < $(this).width())
+	$('#tooltip').css({
+	  top: item.pageY,
+	  left: item.pageX+20
+	});
+      else
+	$('#tooltip').css({
+	  top: item.pageY,
+	  left: item.pageX-$('#tooltip').width()-20,
+	});
+    } else $('#tooltip').hide();
   });
   $('#legend').change(function(){
+    $.options.legend.position = $('#legend').val();
     $.graph.getOptions().legend.position = $('#legend').val();
     $.graph.setupGrid();
+    shareURL();
   });
   $('#dataset').change(function(){
     reloadGraph();
@@ -313,8 +344,10 @@ $(function(){
     $('#real').prop('checked', 0);
     $('#perannum').prop('checked', 0);
     $('#sma5').prop('checked', 0);
+    $.ids = [];
     $.dataSeries = [];
     $.graph = $.plot('#graph', $.dataSeries, $.options);
+    shareURL();
   });
   $('#graph').on('click', 'span.startDate', function(){
     $('#startDate').val($(this).html());
@@ -330,6 +363,7 @@ $(function(){
     $.ids = $.ids.filter(x => x != id);
     $.dataSeries = $.dataSeries.filter(x => x.id != id);
     $.graph = $.plot('#graph', $.dataSeries, $.options);
+    shareURL();
   });
   $('#graph').on('mouseover', 'span.label', function(){
     $(this).find('span.remove').css('display', 'inline-block');
@@ -348,6 +382,10 @@ $(function(){
   $('#addPortfolio').click(function(){
     if ($('#portfolios').val())
       addDataSeries($('#portfolios').val());
+  });
+  $('#copyURL').click(function(){
+    document.getElementById('url').select();
+    document.execCommand('copy');
   });
   initGraph();
 });
