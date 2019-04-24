@@ -1,5 +1,5 @@
-#body {
-    font-family: verdana;
+body {
+    font-family: helvetica, arial, verdana;
 }
 #startDate, #endDate {
     width: 100px;
