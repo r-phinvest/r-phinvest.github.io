@@ -107,7 +107,8 @@ function setupDataSeries(id, data) {
   $.dataSeries.push({
     id: id,
     label: '<span class="label" data-id="'+id+'" data-startdate="'+startDate+'" data-enddate="'+endDate+'">'+entries[id].name+'</span>',
-    lines: {lineWidth: 1},
+    lines: { lineWidth: 1 },
+    shadowSize: 0,
     data: data
   });
   $.graph = $.plot('#graph', $.dataSeries, $.options);

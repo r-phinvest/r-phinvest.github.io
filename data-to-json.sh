@@ -5,7 +5,9 @@ IDS=$(psql -qtnA -c "select id from data_sources where id not in (100, 103)")
 
 echo "entries"
 psql -qtnA -c "
-select id, case when id < 100 then 'index' when id < 200 then 'portfolio' else 'fund' end as type, case when position('(formerly' in name) = 0 then name else trim(substring(name from E'(^.*)\\\(formerly')) end as name, currency, type as fund_type, classification as asset_type, first_date, last_date
+select id, case when id < 100 then 'index' when id < 200 then 'portfolio' else 'fund' end as type,
+case when position('(formerly' in name) = 0 then name else trim(substring(name from E'(^.*)\\\(formerly')) end as name,
+currency, type as fund_type, classification as asset_type, first_date, last_date
 from returns
 where id not in (100, 103)
 order by name
