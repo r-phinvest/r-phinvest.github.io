@@ -114,36 +114,29 @@ function setupDataSeries(id, data) {
   $.graph = $.plot('#graph', $.dataSeries, $.options);
 }
 
-function addDataSeries2(id) {
-  if ($.dataSeries.find(x => x.id == id)) return;
+function fetchDataSeries(id, callback) {
   var entryId = id;
   if (Number($('#dataset').val()) > 0) entryId += '-'+$('#dataset').val();
-  else if ($('#sma5').prop('checked')) entryId += '-sma5';
+  else if ($('#sma5').prop('checked') && id != '101') entryId += '-sma5';
   if (entryId in $.entryData)
-    setupDataSeries(id, $.entryData[entryId]);
+    callback(id, $.entryData[entryId]);
   else
     $.getJSON('data/'+entryId+'.json', function(data){
       $.entryData[entryId] = data.data;
-      setupDataSeries(id, data.data);
+      callback(id, data.data);
     });
 }
 
 function addDataSeries(id) {
   if ($.ids.indexOf(id) == -1) $.ids.push(id);
-  if ($('#real').prop('checked')) {
-    var inflationId = '101';
-    if (Number($('#dataset').val()) > 0) inflationId += '-'+$('#dataset').val();
-    if (inflationId in $.entryData)
-      addDataSeries2(id);
-    else
-      $.getJSON('data/'+inflationId+'.json', function(data){
-	$.entryData[inflationId] = data.data;
-	addDataSeries2(id);
-      });
-  } else {
-    addDataSeries2(id);
-  }
   shareURL();
+  if ($.dataSeries.find(x => x.id == id)) return;
+  if ($('#real').prop('checked'))
+    fetchDataSeries('101', function(){
+      fetchDataSeries(id, setupDataSeries);
+    });
+  else
+    fetchDataSeries(id, setupDataSeries);
 }
 
 function shareURL() {
