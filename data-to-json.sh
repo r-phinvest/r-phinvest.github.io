@@ -104,3 +104,5 @@ order by datei
     done
     echo
 done
+
+curl -so returns.html http://localhost/pse/funds?standalone=1

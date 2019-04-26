@@ -128,8 +128,10 @@ function fetchDataSeries(id, callback) {
 }
 
 function addDataSeries(id) {
-  if ($.ids.indexOf(id) == -1) $.ids.push(id);
-  shareURL();
+  if ($.ids.indexOf(id) == -1) {
+    $.ids.push(id);
+    shareURL();
+  }
   if ($.dataSeries.find(x => x.id == id)) return;
   if ($('#real').prop('checked'))
     fetchDataSeries('101', function(){
