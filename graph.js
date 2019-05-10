@@ -149,7 +149,9 @@ function shareURL() {
     if ($('#'+p).val()) params.push(p+'='+$('#'+p).val());
   for (p of ['real', 'perannum', 'sma5'])
     if ($('#'+p).prop('checked')) params.push(p+'=true');
-  $('#url').val(url+'?'+params.join('&'));
+  url += '?'+params.join('&')
+  $('#url').val(url);
+  history.pushState(null, null, url);
 }
 
 function initGraph() {
