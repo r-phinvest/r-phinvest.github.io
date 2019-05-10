@@ -105,4 +105,10 @@ order by datei
     echo
 done
 
+echo "returns"
 curl -so returns.html http://localhost/pse/funds?standalone=1
+
+echo "data"
+psql -qtnA -F, -c "select code,trade_date,open,high,low,close,volume from pse order by code, trade_date" > data.csv
+zip -9 data.zip data.csv
+rm data.csv
