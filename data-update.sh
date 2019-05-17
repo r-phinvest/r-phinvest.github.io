@@ -29,7 +29,7 @@ echo $IDS | tr ' ' '\n' | while read id; do
     FNR > 1 { printf "," }
     {
 	split($0, a, "|");
-	printf "[%d000,%f]", a[1], a[2];
+	printf "[%d,%f]", a[1], a[2];
     }
     END { printf "]}" }' > data/$id.json
 done
@@ -56,7 +56,7 @@ echo $IDS | tr ' ' '\n' | while read id; do
 	FNR > 1 { printf "," }
 	{
 	    split($0, a, "|");
-	    printf "[%d000,%f]", a[1], a[2];
+	    printf "[%d,%f]", a[1], a[2];
 	}
 	END { printf "]}" }' > data/${id}-sma5.json
 done
@@ -98,7 +98,7 @@ order by datei
 	FNR > 1 { printf "," }
 	{
 	    split($0, a, "|");
-	    printf "[%d000,%f]", a[1], a[2];
+	    printf "[%d,%f]", a[1], a[2];
 	}
 	END { printf "]}" }' > data/${id}-${p}.json
     done

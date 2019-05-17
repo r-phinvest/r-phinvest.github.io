@@ -30,6 +30,7 @@ function setupDataSeries(id, data) {
   if (!data.length) return;
   startDate = (new Date(data[0][0])).toISODate();
   endDate = (new Date(data[data.length-1][0])).toISODate();
+  console.log(data[0][0], startDate, endDate);
   if ($('#startDate').val()) {
     data = data.filter(x => new Date(x[0]) >= new Date($('#startDate').val()));
     if (!data.length) return;
@@ -122,6 +123,7 @@ function fetchDataSeries(id, callback) {
     callback(id, $.entryData[entryId]);
   else
     $.getJSON('data/'+entryId+'.json', function(data){
+      data.data = data.data.map(x => [x[0]*1000, x[1]]);
       $.entryData[entryId] = data.data;
       callback(id, data.data);
     });
