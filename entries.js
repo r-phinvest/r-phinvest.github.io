@@ -131,7 +131,7 @@ var entries = {"1369":{"type":"fund","name":"AB CAPITAL BALANCED FUND","startDat
 "833":{"type":"fund","name":"Grepalife Fixed Income Fund Corp.","startDate":"2004-10-14","endDate":"2019-10-04"},
 "5":{"type":"index","name":"Holding Firms","startDate":"2006-01-02","endDate":"2019-10-04"},
 "4":{"type":"index","name":"Industrial","startDate":"2006-01-02","endDate":"2019-10-04"},
-"101":{"type":"portfolio","name":"Inflation","startDate":"1986-01-01","endDate":"2019-08-31"},
+"101":{"type":"portfolio","name":"Inflation","startDate":"1986-01-01","endDate":"2019-09-30"},
 "1438":{"type":"fund","name":"LANDBANK Bond Fund","startDate":"2006-03-13","endDate":"2019-10-03"},
 "1560":{"type":"fund","name":"LANDBANK Equity Index Fund","startDate":"2016-08-01","endDate":"2019-10-03"},
 "1440":{"type":"fund","name":"LANDBANK Global $ Fund","startDate":"2006-03-13","endDate":"2019-10-03"},

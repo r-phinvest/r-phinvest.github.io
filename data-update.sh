@@ -1,7 +1,7 @@
 #!/bin/bash
 
-IDS=$(psql -qtnA -c "select id from data_sources where id not in (100, 103)")
-#IDS="1 101 102 804"
+#IDS=$(psql -qtnA -c "select id from data_sources where id not in (100, 103)")
+IDS="101 102"
 
 echo "entries"
 psql -qtnA -c "
@@ -108,7 +108,7 @@ done
 echo "returns"
 curl -so returns.html http://localhost/pse/funds?standalone=1
 
-echo "data"
-psql -qtnA -F, -c "select code,trade_date,open,high,low,close,volume from pse order by code, trade_date" > data.csv
-zip -9 data.zip data.csv
-rm data.csv
+#echo "data"
+#psql -qtnA -F, -c "select code,trade_date,open,high,low,close,volume from pse order by code, trade_date" > data.csv
+#zip -9 data.zip data.csv
+#rm data.csv
