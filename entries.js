@@ -116,7 +116,7 @@ var entries = {"1369":{"type":"fund","name":"AB CAPITAL BALANCED FUND","startDat
 "1374":{"type":"fund","name":"Equity Investment Trust Fund","startDate":"2006-05-04","endDate":"2019-10-04"},
 "3":{"type":"index","name":"Financials","startDate":"2006-01-02","endDate":"2019-10-04"},
 "1606":{"type":"fund","name":"First Metro Consumer Fund on MSCI Phils. IMI, Inc.","startDate":"2018-04-23","endDate":"2019-10-04"},
-"947":{"type":"fund","name":"First Metro Phil. Equity Exchange Traded Fund, Inc.","startDate":"2013-12-18","endDate":"2019-10-04"},
+"947":{"type":"fund","name":"First Metro Phil. Equity Exchange Traded Fund, Inc. (WARNING: Unreliable data)","startDate":"2013-12-18","endDate":"2019-10-04"},
 "812":{"type":"fund","name":"First Metro Save and Learn Balanced Fund Inc.","startDate":"2007-06-15","endDate":"2019-10-04"},
 "1518":{"type":"fund","name":"First Metro Save and Learn Dollar Bond Fund, Inc.","startDate":"2014-10-01","endDate":"2019-10-04"},
 "802":{"type":"fund","name":"First Metro Save and Learn Equity Fund,Inc.","startDate":"2005-10-12","endDate":"2019-10-04"},
