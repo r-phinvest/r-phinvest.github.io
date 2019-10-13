@@ -387,7 +387,5 @@ $(function(){
     document.execCommand('copy');
   });
   $('#funds').select2();
-  $('#indexes').select2();
-  $('#portfolios').select2();
   initGraph();
 });
