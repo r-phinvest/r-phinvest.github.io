@@ -106,7 +106,7 @@ function setupDataSeries(id, data) {
   }
   $.dataSeries.push({
     id: id,
-    label: '<span class="label" data-id="'+id+'" data-startdate="'+startDate+'" data-enddate="'+endDate+'">'+entries[id].name+'</span>',
+    label: '<span class="label" data-id="'+id+'" data-startdate="'+startDate+'" data-enddate="'+endDate+'">'+$.entryHash[id].name+'</span>',
     lines: { lineWidth: 1 },
     shadowSize: 0,
     data: data
@@ -200,23 +200,41 @@ $(function(){
     }
   };
   $.graph = $.plot('#graph', $.dataSeries, $.options);
-  var funds = [];
-  for (var key in entries)
-    switch (entries[key].type) {
+  $.entryHash = {};
+  var optgroup = [];
+  var previous_institution = null;
+  for (var entry of entries) {
+    $.entryHash[entry.id] = entry;
+    switch (entry.type) {
     case "fund":
-      funds.push([key, entries[key].name]);
+      if (entry.institution != previous_institution) {
+	if (optgroup.length) {
+	  var html = '<optgroup label="'+previous_institution+'">';
+	  for (var option of optgroup)
+	    html += '<option value="'+option.id+'">'+option.name+'</option>';
+	  html += '</optgroup>';
+	  $('#funds').append(html);
+	  optgroup = [];
+	}
+	previous_institution = entry.institution;
+      }
+      optgroup.push(entry);
       break;
     case "index":
-      $('#indexes').append('<option value="'+key+'">'+entries[key].name+'</option>');
+      $('#indexes').append('<option value="'+entry.id+'">'+entry.name+'</option>');
       break;
     default:
-      $('#portfolios').append('<option value="'+key+'">'+entries[key].name+'</option>');
+      $('#portfolios').append('<option value="'+entry.id+'">'+entry.name+'</option>');
     }
-  funds.sort(function(a, b){
-    return a[1].toUpperCase() > b[1].toUpperCase() ? 1 : -1;
-  });
-  for (var f of funds)
-    $('#funds').append('<option value="'+f[0]+'">'+f[1]+'</option>');
+  }
+  if (optgroup.length) {
+    var html = '<optgroup label="'+previous_institution+'">';
+    for (var option of optgroup)
+      html += '<option value="'+option.id+'">'+option.name+'</option>';
+    html += '</optgroup>';
+    $('#funds').append(html);
+    optgroup = [];
+  }
   $('#width').val($('#graph').width());
   $('#height').val($('#graph').height());
   $('#graph').bind('plotselected', function(event, ranges){
@@ -331,8 +349,8 @@ $(function(){
     var min = null, max = null;
     var data; 
     for (var id of $.ids) {
-      if (!min || new Date(entries[id].startDate) < min) min = new Date(entries[id].startDate);
-      if (!max || new Date(entries[id].endDate) > max) max = new Date(entries[id].endDate);
+      if (!min || new Date($.entryHash[id].startDate) < min) min = new Date($.entryHash[id].startDate);
+      if (!max || new Date($.entryHash[id].endDate) > max) max = new Date($.entryHash[id].endDate);
     }
     $('#startDate').val(min.toISODate());
     $('#endDate').val(max.toISODate());
@@ -386,6 +404,5 @@ $(function(){
     document.getElementById('url').select();
     document.execCommand('copy');
   });
-  $('#funds').select2();
   initGraph();
 });
