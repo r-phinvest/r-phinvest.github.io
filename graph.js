@@ -201,24 +201,18 @@ $(function(){
   };
   $.graph = $.plot('#graph', $.dataSeries, $.options);
   $.entryHash = {};
-  var optgroup = [];
+  var optgroup = null;
   var previous_institution = null;
   for (var entry of entries) {
     $.entryHash[entry.id] = entry;
     switch (entry.type) {
     case "fund":
       if (entry.institution != previous_institution) {
-	if (optgroup.length) {
-	  var html = '<optgroup label="'+previous_institution+'">';
-	  for (var option of optgroup)
-	    html += '<option value="'+option.id+'">'+option.name+'</option>';
-	  html += '</optgroup>';
-	  $('#funds').append(html);
-	  optgroup = [];
-	}
+	if (optgroup) $('#funds').append(optgroup);
+	optgroup = $('<optgroup />', {label: entry.institution});
 	previous_institution = entry.institution;
       }
-      optgroup.push(entry);
+      optgroup.append('<option value="'+entry.id+'">'+entry.name+'</option>');
       break;
     case "index":
       $('#indexes').append('<option value="'+entry.id+'">'+entry.name+'</option>');
@@ -227,14 +221,7 @@ $(function(){
       $('#portfolios').append('<option value="'+entry.id+'">'+entry.name+'</option>');
     }
   }
-  if (optgroup.length) {
-    var html = '<optgroup label="'+previous_institution+'">';
-    for (var option of optgroup)
-      html += '<option value="'+option.id+'">'+option.name+'</option>';
-    html += '</optgroup>';
-    $('#funds').append(html);
-    optgroup = [];
-  }
+  $('#funds').append(optgroup);
   $('#width').val($('#graph').width());
   $('#height').val($('#graph').height());
   $('#graph').bind('plotselected', function(event, ranges){
