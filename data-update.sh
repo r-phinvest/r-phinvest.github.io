@@ -5,9 +5,10 @@ IDS=$(psql -qtnA -c "select id from data_sources where id not in (100, 103)")
 
 echo "entries"
 psql -qtnA -c "
-select id, case when id < 100 then 'index' when id < 200 then 'portfolio' else 'fund' end as type,
+select id,
+case when id < 100 then 'index' when id < 200 then 'portfolio' else 'fund' end as type,
 case when position('(formerly' in name) = 0 then name else trim(substring(name from E'(^.*)\\\(formerly')) end as name,
-institution, currency, type as fund_type, classification as asset_type, first_date, last_date
+institution, first_date, last_date
 from returns
 where id not in (100, 103)
 order by institution, name
@@ -16,7 +17,7 @@ BEGIN { printf "var entries = [" }
 FNR > 1 { printf ",\n" }
 {
 split($0, a, "|");
-printf("{\"id\":%d,\"type\":\"%s\",\"name\":\"%s\",\"institution\":\"%s\",\"startDate\":\"%s\",\"endDate\":\"%s\"}", a[1], a[2], a[3], a[4], a[7], a[8]);
+printf("{\"id\":%d,\"type\":\"%s\",\"name\":\"%s\",\"institution\":\"%s\",\"startDate\":\"%s\",\"endDate\":\"%s\"}", a[1], a[2], a[3], a[4], a[5], a[6]);
 }
 END { printf "];" }
 ' > entries.js
