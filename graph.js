@@ -222,6 +222,7 @@ $(function(){
     }
   }
   $('#funds').append(optgroup);
+  $('#funds').select2();
   $('#width').val($('#graph').width());
   $('#height').val($('#graph').height());
   $('#graph').bind('plotselected', function(event, ranges){
