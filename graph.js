@@ -278,14 +278,14 @@ $(function(){
     changeMonth: true,
     changeYear: true,
     constrainInput: true,
-    yearRange: '1986:2020'
+    yearRange: '1986:2021'
   });
   $('#endDate').datepicker({
     dateFormat: 'yy-mm-dd',
     changeMonth: true,
     changeYear: true,
     constrainInput: true,
-    yearRange: '1986:2020'
+    yearRange: '1986:2021'
   });
   $('#showStartDate').change(function(){
     $.graph.setupGrid();
