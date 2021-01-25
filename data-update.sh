@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IDS=$(psql -qtnA -c "select id from data_sources where id not in (100, 103)")
+IDS=$(psql -qtnA -c "select id from data_sources where id not in (100, 103, 104)")
 #IDS="101 102"
 
 echo "entries"
